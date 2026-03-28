@@ -1,0 +1,19 @@
+{
+  "name": "playful-saas",
+  "label": "Playful SaaS",
+  "description": "Lively SaaS palette with roomy spacing and upbeat product energy.",
+  "tokens": {
+    "radius": "28px",
+    "fontHeading": "\"Trebuchet MS\", \"Helvetica Neue\", Arial, sans-serif",
+    "fontBody": "\"Helvetica Neue\", Arial, sans-serif",
+    "surface": "#fffaf1",
+    "surfaceAlt": "#fff0d9",
+    "panel": "#ffffff",
+    "text": "#2a1937",
+    "muted": "#6d5c78",
+    "primary": "#f06f35",
+    "accent": "#ffd166",
+    "border": "#f0d0ba",
+    "shadow": "0 24px 56px rgba(188, 95, 34, 0.14)"
+  }
+}

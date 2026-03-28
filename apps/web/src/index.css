@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--prd-font-body, "Helvetica Neue", Arial, sans-serif);
+  background: #f8f1e9;
+  color: #231d18;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--prd-font-heading, Georgia, serif);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+}
+
+code {
+  border-radius: 999px;
+  background: rgba(164, 79, 36, 0.08);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.9em;
+}
+
+.prose h2,
+.prose h3 {
+  scroll-margin-top: 2rem;
+}
+
+.prd-markdown {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.prd-markdown h1,
+.prd-markdown h2,
+.prd-markdown h3,
+.prd-markdown h4 {
+  margin: 0;
+  color: var(--prd-text);
+}
+
+.prd-markdown h2 {
+  margin-top: 1rem;
+  font-size: 2rem;
+}
+
+.prd-markdown h3 {
+  margin-top: 0.5rem;
+  font-size: 1.35rem;
+}
+
+.prd-markdown p,
+.prd-markdown li {
+  color: var(--prd-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.prd-markdown ul,
+.prd-markdown ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}

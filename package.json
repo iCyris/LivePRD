@@ -1,0 +1,32 @@
+{
+  "name": "live-prd",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@latest",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "cli": "node ./packages/cli/index.mjs",
+    "validate": "node ./packages/cli/index.mjs validate",
+    "render": "node ./packages/cli/index.mjs render",
+    "dev": "npm run render && vite --config ./apps/web/vite.config.mjs",
+    "build": "npm run render && vite build --config ./apps/web/vite.config.mjs",
+    "preview": "vite preview --config ./apps/web/vite.config.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.27",
+    "clsx": "^2.1.1",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^1.7.0",
+    "marked": "^17.0.5",
+    "postcss": "^8.5.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.18"
+  }
+}

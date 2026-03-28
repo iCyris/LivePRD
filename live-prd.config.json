@@ -1,0 +1,8 @@
+{
+  "contentDir": "docs/prd",
+  "demoDir": "demos",
+  "themeDir": "themes",
+  "defaultTheme": "editorial-warm",
+  "generatedModule": "apps/web/src/generated/prd-data.mjs",
+  "distDir": "dist/prd"
+}

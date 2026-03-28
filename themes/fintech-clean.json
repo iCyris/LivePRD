@@ -1,0 +1,19 @@
+{
+  "name": "fintech-clean",
+  "label": "Fintech Clean",
+  "description": "Cool neutral product surfaces with crisp borders and compact hierarchy.",
+  "tokens": {
+    "radius": "18px",
+    "fontHeading": "\"Segoe UI\", Arial, sans-serif",
+    "fontBody": "\"Segoe UI\", Arial, sans-serif",
+    "surface": "#f4f8fb",
+    "surfaceAlt": "#e8f0f8",
+    "panel": "#ffffff",
+    "text": "#122033",
+    "muted": "#5f7084",
+    "primary": "#1457d2",
+    "accent": "#4f9ff8",
+    "border": "#c6d6ea",
+    "shadow": "0 18px 48px rgba(20, 57, 112, 0.10)"
+  }
+}

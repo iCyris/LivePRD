@@ -1,0 +1,19 @@
+{
+  "name": "editorial-warm",
+  "label": "Editorial Warm",
+  "description": "Warm editorial surfaces with clear hierarchy and softer product storytelling.",
+  "tokens": {
+    "radius": "24px",
+    "fontHeading": "Georgia, Cambria, \"Times New Roman\", Times, serif",
+    "fontBody": "\"Helvetica Neue\", Arial, sans-serif",
+    "surface": "#fcf7f0",
+    "surfaceAlt": "#f4e7d8",
+    "panel": "#fffdf9",
+    "text": "#221c18",
+    "muted": "#6e6357",
+    "primary": "#a44f24",
+    "accent": "#d89357",
+    "border": "#dcc4a6",
+    "shadow": "0 24px 60px rgba(92, 51, 23, 0.10)"
+  }
+}

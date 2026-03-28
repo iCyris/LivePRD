@@ -1,0 +1,18 @@
+{
+  "name": "editorial-warm",
+  "label": "Editorial Warm",
+  "description": "Warm editorial surfaces with strong hierarchy for narrative PRDs.",
+  "tokens": {
+    "radius": "1rem",
+    "fontHeading": "\"Fraunces\", serif",
+    "fontBody": "\"Inter\", sans-serif",
+    "surface": "#fcf7f0",
+    "surfaceAlt": "#f3e7d5",
+    "text": "#1f1a17",
+    "muted": "#6f6255",
+    "primary": "#9f4a22",
+    "accent": "#d89052",
+    "border": "#d5c1aa",
+    "shadow": "0 18px 40px rgba(80, 43, 24, 0.08)"
+  }
+}

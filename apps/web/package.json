@@ -1,0 +1,5 @@
+{
+  "name": "@live-prd/web",
+  "private": true,
+  "type": "module"
+}
