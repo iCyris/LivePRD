@@ -1,19 +1,40 @@
 {
   "name": "live-prd",
-  "private": true,
+  "version": "0.2.0",
+  "description": "CLI and starter workspace for living Markdown PRDs with embedded React demos.",
+  "private": false,
   "type": "module",
   "packageManager": "bun@latest",
+  "bin": {
+    "live-prd": "./packages/cli/index.mjs"
+  },
+  "files": [
+    "apps",
+    "packages",
+    "skills",
+    "scripts",
+    "themes",
+    "demos",
+    "docs/prd/*.md",
+    "live-prd.config.json",
+    "README.md"
+  ],
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
+    "live-prd": "node ./packages/cli/index.mjs",
     "cli": "node ./packages/cli/index.mjs",
+    "init": "node ./packages/cli/index.mjs init",
+    "doctor": "node ./packages/cli/index.mjs doctor",
     "validate": "node ./packages/cli/index.mjs validate",
     "render": "node ./packages/cli/index.mjs render",
-    "dev": "npm run render && vite --config ./apps/web/vite.config.mjs",
-    "build": "npm run render && vite build --config ./apps/web/vite.config.mjs",
-    "preview": "vite preview --config ./apps/web/vite.config.mjs"
+    "dev": "node ./packages/cli/index.mjs dev",
+    "build": "node ./packages/cli/index.mjs build",
+    "preview": "node ./packages/cli/index.mjs preview",
+    "skill:install": "node ./packages/cli/index.mjs skill-install",
+    "release:local": "node ./packages/cli/index.mjs release-local"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.4",

@@ -1,8 +1,5 @@
 {
   "name": "@live-prd/cli",
   "private": true,
-  "type": "module",
-  "bin": {
-    "live-prd": "./index.mjs"
-  }
+  "type": "module"
 }
