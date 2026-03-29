@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import { extractPrdComments } from "../../../../packages/engine/prd-comments.mjs";
 
 const directivePattern = /:::live-(demo|page)\n([\s\S]*?):::/g;
 const themeModules = import.meta.glob("../../../../themes/*.json", {
@@ -220,6 +221,7 @@ export function demoThemeVars() {
 
 export function parseRuntimeDocument(markdown, fallbackDocument) {
   const { frontmatter, body } = parseFrontmatter(markdown);
+  const { bodyMarkdown, comments } = extractPrdComments(body);
   const themeName = frontmatter.theme || fallbackDocument.theme?.name || fallbackDocument.meta.theme;
   const theme = themes[themeName] || fallbackDocument.theme;
 
@@ -230,9 +232,10 @@ export function parseRuntimeDocument(markdown, fallbackDocument) {
       ...fallbackDocument.meta,
       ...frontmatter,
     },
-    toc: extractToc(body),
+    toc: extractToc(bodyMarkdown),
     theme,
+    comments,
     markdown,
-    blocks: parseBlocks(body),
+    blocks: parseBlocks(bodyMarkdown),
   };
 }

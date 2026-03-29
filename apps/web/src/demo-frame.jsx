@@ -14,7 +14,7 @@ function postFrameEvent(type, payload = {}) {
 
 function renderMessage(mountNode, title, message) {
   ReactDOM.createRoot(mountNode).render(
-    <main className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
+    <main className="flex min-h-full items-center justify-center bg-[color:var(--prd-surface)] p-4 text-foreground">
       <section className="max-w-lg rounded-md border bg-card px-4 py-3 shadow-sm">
         <p className="text-sm font-medium">{title}</p>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">{message}</p>
@@ -47,7 +47,7 @@ class DemoErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
+        <main className="flex min-h-full items-center justify-center bg-[color:var(--prd-surface)] p-4 text-foreground">
           <section className="max-w-lg rounded-md border bg-card px-4 py-3 shadow-sm">
             <p className="text-sm font-medium">Demo failed to render</p>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">{this.state.message}</p>
@@ -69,6 +69,10 @@ function applyDemoEnvironment(config) {
   }
 
   document.body.style.margin = "0";
+  document.body.style.background = "var(--prd-surface)";
+  document.body.style.color = "var(--prd-text)";
+  root.style.background = "var(--prd-surface)";
+  root.style.color = "var(--prd-text)";
 }
 
 function attachHeightObserver(frameId, mountNode) {
@@ -152,7 +156,7 @@ async function bootstrap() {
   ReactDOM.createRoot(mountNode).render(
     <React.StrictMode>
       <DemoErrorBoundary frameId={config.frameId}>
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="bg-[color:var(--prd-surface)] text-foreground">
           <DemoComponent />
         </div>
       </DemoErrorBoundary>

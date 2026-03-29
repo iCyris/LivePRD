@@ -14,14 +14,8 @@ export async function fetchPrdCatalog() {
   return payload.documents ?? [];
 }
 
-export async function fetchVersionState(slug) {
-  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/versions`);
-  const payload = await readJson(response);
-  return payload;
-}
-
-export async function saveVersionFile(slug, input) {
-  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/versions/save`, {
+export async function createPrdComment(slug, input) {
+  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/comments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -29,28 +23,37 @@ export async function saveVersionFile(slug, input) {
     body: JSON.stringify(input),
   });
 
+  if (response.status === 404) {
+    throw new Error("Comment API is unavailable. Restart `npm run dev` or `npm run preview`, and do not open the built HTML file directly for comment editing.");
+  }
+
   return readJson(response);
 }
 
-export async function archiveVersionFile(slug, versionId) {
-  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/versions/archive`, {
-    method: "POST",
+export async function updatePrdCommentStatus(slug, commentId, status) {
+  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`, {
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ versionId }),
+    body: JSON.stringify({ status }),
   });
+
+  if (response.status === 404) {
+    throw new Error("Comment API is unavailable. Restart `npm run dev` or `npm run preview`, and do not open the built HTML file directly for comment editing.");
+  }
 
   return readJson(response);
 }
 
-export async function deleteVersionFile(slug, versionId) {
-  const response = await fetch(
-    `/api/prd/${encodeURIComponent(slug)}/versions/${encodeURIComponent(versionId)}`,
-    {
-      method: "DELETE",
-    },
-  );
+export async function deletePrdComment(slug, commentId) {
+  const response = await fetch(`/api/prd/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`, {
+    method: "DELETE",
+  });
+
+  if (response.status === 404) {
+    throw new Error("Comment API is unavailable. Restart `npm run dev` or `npm run preview`, and do not open the built HTML file directly for comment editing.");
+  }
 
   return readJson(response);
 }

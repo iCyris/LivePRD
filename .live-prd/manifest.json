@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "workspaceVersion": "0.2.0",
+  "generatedAt": "2026-03-29T03:09:24.841Z",
+  "managedFiles": {
+    "apps/web/demo-frame.html": {
+      "appliedHash": "f3dab240cffa8cbd8b7b77c6698269c6d65d13d37413c6e5881d10a590c2c281"
+    },
+    "apps/web/index.html": {
+      "appliedHash": "9bb5c6fc5fdc6497f1145ba59b645305dad3421bc5015aa23a43cafe1359f044"
+    },
+    "apps/web/node_modules/.vite/deps/_metadata.json": {
+      "appliedHash": "ec61bd9bf279b29a0e57d85fd5969318685b91d3b4d439ca9be22efa32ada502"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-ACRLO6WD.js": {
+      "appliedHash": "8a6be27abb5cdca6ffcb9d7061d40486bd98a1617155dc2f0f94c40c4b171a83"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-ACRLO6WD.js.map": {
+      "appliedHash": "9bc02d91c7f9daa81727652564ec6a13f574158d70b11efa4b3e97d944b5fb45"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-DC5AMYBS.js": {
+      "appliedHash": "d8840fb5b382f9734cb1c1b4b12ca0bbd3022a456d8405fac0e71cfa4f2c6029"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-DC5AMYBS.js.map": {
+      "appliedHash": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-TKCM3552.js": {
+      "appliedHash": "367b3d8984833a1d6868fce3505b3bc26f2ba20221d16ac4aca63bc82e44aef6"
+    },
+    "apps/web/node_modules/.vite/deps/chunk-TKCM3552.js.map": {
+      "appliedHash": "1e3fb02265976bb501a70f2a0c7bbe3e56dcb59481c0a2468ca497e428b70f6c"
+    },
+    "apps/web/node_modules/.vite/deps/clsx.js": {
+      "appliedHash": "b6aa873fb821cb3527da8a401b624b69f1924b15cd506da0002f534e86f86d51"
+    },
+    "apps/web/node_modules/.vite/deps/clsx.js.map": {
+      "appliedHash": "25583ef1396e88f16d0e6f6851a57dadf1e673e3fb064a6d393f261b502afe51"
+    },
+    "apps/web/node_modules/.vite/deps/lucide-react.js": {
+      "appliedHash": "80e3a7e077afaf9278524df22a7b69b8d6586d3159e88ac6003ed391404d2cfa"
+    },
+    "apps/web/node_modules/.vite/deps/lucide-react.js.map": {
+      "appliedHash": "21bc58ab7e4a42dca8101953fb932e6d564ac8bf41035001eb93954a66d1e729"
+    },
+    "apps/web/node_modules/.vite/deps/marked.js": {
+      "appliedHash": "d495f7d557d275e61ad3d6871913b63c6ac2afd125e81a47a463085a63cd8e01"
+    },
+    "apps/web/node_modules/.vite/deps/marked.js.map": {
+      "appliedHash": "8d9ca62858c35829c3311428f97b3644b3ed18c23d1140d184f9ef253bbed19a"
+    },
+    "apps/web/node_modules/.vite/deps/package.json": {
+      "appliedHash": "3ca9d4afd21425087cf31893b8f9f63c81b0b8408db5e343ca76e5f8aa26ab9a"
+    },
+    "apps/web/node_modules/.vite/deps/react_jsx-dev-runtime.js": {
+      "appliedHash": "16592dba9cb494484262d8ea53388afab8d74b21e6e6e9b606579b513d938c4d"
+    },
+    "apps/web/node_modules/.vite/deps/react_jsx-dev-runtime.js.map": {
+      "appliedHash": "8835544f7a28fa318c336bf2261c6a742311a4443c130e34ca86a92e35cd7c7d"
+    },
+    "apps/web/node_modules/.vite/deps/react_jsx-runtime.js": {
+      "appliedHash": "585be27ae5a055b5c4ffb7e9a9a17deab638f608b4a71af721d28f35cb7ec611"
+    },
+    "apps/web/node_modules/.vite/deps/react_jsx-runtime.js.map": {
+      "appliedHash": "4b75eb0242d7899a5a921669d5882bbf16445e18dacca551fdfc2a50b19d6f9c"
+    },
+    "apps/web/node_modules/.vite/deps/react-dom_client.js": {
+      "appliedHash": "81276942653f89f4f653615397d1071c7bb88933b7bb606a06e7aafda2aaa2d3"
+    },
+    "apps/web/node_modules/.vite/deps/react-dom_client.js.map": {
+      "appliedHash": "360cc1935b68bbb304811b88f97251f10c0ef6632f40d4db305d6fb8367e0d6f"
+    },
+    "apps/web/node_modules/.vite/deps/react-dom.js": {
+      "appliedHash": "fb80954a50879afddbe96b29861589854cfe671fe034a5db960d753c9e62f060"
+    },
+    "apps/web/node_modules/.vite/deps/react-dom.js.map": {
+      "appliedHash": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+    },
+    "apps/web/node_modules/.vite/deps/react.js": {
+      "appliedHash": "04f8db7c13d777f568bf32befb32dcdd3c4821484a079b5b9a3dd6f1bb23675d"
+    },
+    "apps/web/node_modules/.vite/deps/react.js.map": {
+      "appliedHash": "ed562b0bba7ee7214e56ac7f728054b3496bec4597c94a4eb7b4179e6f5cb1c9"
+    },
+    "apps/web/node_modules/.vite/deps/tailwind-merge.js": {
+      "appliedHash": "48bb12120ec0f6713e48ffaa2b90fe8c8b298bd752ed800efb2da19492d1249e"
+    },
+    "apps/web/node_modules/.vite/deps/tailwind-merge.js.map": {
+      "appliedHash": "c518d494def65f8c94a8260376157544323ac69bb02dfd6803c109a446ec7916"
+    },
+    "apps/web/package.json": {
+      "appliedHash": "c56815f3d600bbbe50ea0b416cfb1f19f913ab3dfd8d5e9d6c2d59b82c21a241"
+    },
+    "apps/web/postcss.config.cjs": {
+      "appliedHash": "793b5c7e086430d3b14311a50a07426a2a631bca15fe4e81a1f907810758d2d0"
+    },
+    "apps/web/public/favicon.svg": {
+      "appliedHash": "a043366b27798e883278883dfd14de5aedcb01f1495da55ed0d3fb528b72ced7"
+    },
+    "apps/web/src/App.jsx": {
+      "appliedHash": "61a9cabc0a48ad1cca457a5677302f3fa328090fe8915d3ea9e747e48249b4d6"
+    },
+    "apps/web/src/components/AuthorStudio.jsx": {
+      "appliedHash": "721c843920750f57810466a92cb0fadd8c88dec06aa6545e42e15d26bde1f1d6"
+    },
+    "apps/web/src/components/LanguageToggle.jsx": {
+      "appliedHash": "0a4c61c4e1216a443e8416414798e5053c2ed4e93f1719c81050428c1ff63342"
+    },
+    "apps/web/src/components/LiveBlock.jsx": {
+      "appliedHash": "7b4184c01b093b519b617958782a1e3cf32c20a864657fa871687242d1eb2d66"
+    },
+    "apps/web/src/components/ModeToggle.jsx": {
+      "appliedHash": "e5021c896fd02d26139e4ef7d9d56382a6a53bafb2efa14437d1ab3f6d312eec"
+    },
+    "apps/web/src/components/ui/badge.jsx": {
+      "appliedHash": "f19b092949d99cb2aa62c29f01afdd8be18cab9175efd571f1a83b0e79a5dcad"
+    },
+    "apps/web/src/components/ui/button.jsx": {
+      "appliedHash": "b2a6d25543a13736a96ca1dd525cc5b652a08779b95d3b1072987dfab20f9810"
+    },
+    "apps/web/src/components/ui/card.jsx": {
+      "appliedHash": "024180e79b961e6f576eb51de4ec592792f38629774e7a8037e5f02985670ac4"
+    },
+    "apps/web/src/demo-frame.jsx": {
+      "appliedHash": "6c1903739fc33f8567873426653a69ea969432c935eb45d1cf4725c0435f5772"
+    },
+    "apps/web/src/demo-registry.js": {
+      "appliedHash": "b8a576f5b68dd645d38521e41004e3cfbc4f65451864d93b9f85777354247548"
+    },
+    "apps/web/src/index.css": {
+      "appliedHash": "92fee97d689683d9c4db3258280b45511c3beb8e4c591fea82a0c2dd0228b2dc"
+    },
+    "apps/web/src/lib/authoring-engine.js": {
+      "appliedHash": "01cb19f23ed15487809d3c5c32faf8bb20d0684706c9dac37a474ba16b543491"
+    },
+    "apps/web/src/lib/cn.js": {
+      "appliedHash": "eda3beb73fdfba01f4aacb1b6c1913b02238bc20254793bc9c6ef3c0dc5e72ea"
+    },
+    "apps/web/src/lib/file-authoring.js": {
+      "appliedHash": "742d1f675cd4de48e81943bcc843c4449788eb64953a7dfd8efeef9a8a111f98"
+    },
+    "apps/web/src/lib/i18n.js": {
+      "appliedHash": "67a7a5255063a7c23fc93b8572cdd5498e7c62368a2e8cec3f4b8c4adf4754dd"
+    },
+    "apps/web/src/lib/markdown-diff.js": {
+      "appliedHash": "d597bb62cf5146312f0248b7a09e508897d342df00c385396d8c3ad6481f0c46"
+    },
+    "apps/web/src/lib/prd-runtime.js": {
+      "appliedHash": "d19fd677a4956639200acb817a982539700ffda6c4b54a3c4e847a777165be2d"
+    },
+    "apps/web/src/lib/share-export.js": {
+      "appliedHash": "ddf240b4bf2a78d5b04bfab4e582d6aa7eae42c14ff49f214b5221882657b70c"
+    },
+    "apps/web/src/lib/theme.js": {
+      "appliedHash": "02115500c9010f6c53c535ef6345fd5088004f7d932316d088018b10e1305d46"
+    },
+    "apps/web/src/lib/version-store.js": {
+      "appliedHash": "106c2894ddddc0071ce1517918168be8333b46c6b0ed1146fea77b2ac2941ea1"
+    },
+    "apps/web/src/main.jsx": {
+      "appliedHash": "2b7d8c7d7e2cde582295037c3cee54d7ecf60a9a6f66c395c205f14302a5f146"
+    },
+    "apps/web/tailwind.config.cjs": {
+      "appliedHash": "bbac6650fea0b035cad2447898c6705ee0a53b35946766a0529360559d22f258"
+    },
+    "apps/web/vite.config.mjs": {
+      "appliedHash": "ce78109b8e66cfe5b0ee50cb9488924b245fc68fbb61f15b5187a30e6b5f681f"
+    },
+    "packages/cli/index.mjs": {
+      "appliedHash": "6ce76ab9556dc742fceb09b19fd752389f371ed3245d539a15cc8e031947a1ed"
+    },
+    "packages/cli/package.json": {
+      "appliedHash": "3f8482a74b74c7762c00881a42403ef0512f559910c46c230240c94c0766e400"
+    },
+    "packages/engine/index.mjs": {
+      "appliedHash": "3b988fbfc756934a331763662b8f36828ef7a8bb09be189004e5e57e66c71e4e"
+    },
+    "packages/engine/package.json": {
+      "appliedHash": "d1cdbf1783f0a5392c4844a0fc4f383a18f3016db36a5f99781f2498f005d870"
+    },
+    "scripts/install-skill.mjs": {
+      "appliedHash": "d0de17be7cbba08fae057d125350e764fa13e24f721c7427084063edd15742d2"
+    },
+    "scripts/release-local.mjs": {
+      "appliedHash": "4d632ffe7a1f6f486b80b77d73600cd077683e58baa4da8e594bd1b89c9dff59"
+    },
+    "themes/editorial-warm.json": {
+      "appliedHash": "ce178f09c70022e3e84d734c07eba073e95ec0d8fbf8559bd024c0d712de7779"
+    }
+  },
+  "mixedFiles": {
+    "packageJsonTemplateVersion": "0.2.0",
+    "configTemplateVersion": "0.2.0"
+  }
+}

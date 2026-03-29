@@ -7,7 +7,10 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
-const sourceDir = path.join(projectRoot, "skills", "live-prd-studio");
+const sourceDirCandidates = [
+  path.join(projectRoot, "skills", "live-prd-studio"),
+  path.join(projectRoot, "packages", "cli", "assets", "live-prd-studio"),
+];
 
 function printUsage() {
   console.log("Usage: node ./scripts/install-skill.mjs [--target <dir>] [--force]");
@@ -22,9 +25,20 @@ async function exists(targetPath) {
   }
 }
 
+async function resolveSourceDir() {
+  for (const candidate of sourceDirCandidates) {
+    if (await exists(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error("Could not find the bundled live-prd skill assets in this workspace.");
+}
+
 export async function runInstallSkill(args = process.argv.slice(2)) {
   let targetRoot = path.join(process.cwd(), ".agents", "skills");
   let force = false;
+  const sourceDir = await resolveSourceDir();
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];

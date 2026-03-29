@@ -1,5 +1,5 @@
-const modules = import.meta.glob("../../../demos/**/*.{js,jsx}");
-const rawModules = import.meta.glob("../../../demos/**/*.{js,jsx}", {
+const modules = import.meta.glob("../../../demos/**/*.{js,jsx,ts,tsx}");
+const rawModules = import.meta.glob("../../../demos/**/*.{js,jsx,ts,tsx}", {
   eager: true,
   import: "default",
   query: "?raw",

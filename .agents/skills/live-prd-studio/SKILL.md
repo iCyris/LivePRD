@@ -168,18 +168,6 @@ caption: Explain what this page proves.
 - Model the important happy path, edge states, loading states, and recovery states.
 - Prefer small, explainable components over huge prototypes when the PRD only needs a stateful interaction proof.
 - When the user asks for an inserted UI, generate both the TSX file and the matching directive block.
-- Keep demo UIs inside the existing shadcn-style component system under `apps/web/src/components/ui/` whenever possible.
-- Before adding a new UI primitive, check whether an equivalent local component already exists in `apps/web/src/components/ui/`.
-- When a needed primitive does not exist yet, add a new local shadcn-style component file under `apps/web/src/components/ui/` and keep the API aligned with the existing `Button`, `Card`, and `Badge` patterns.
-- Use the shared `cn` helper from `apps/web/src/lib/cn.js` when composing Tailwind class names inside UI primitives.
-- Prefer relative imports that match the current file location, for example:
-  `./components/ui/button.jsx`
-  `./components/ui/card.jsx`
-  `../components/ui/button.jsx`
-- Do not assume this repo already has the upstream shadcn CLI wiring such as `components.json` or `npx shadcn add ...`.
-- In this repo, "use shadcn/ui" means "preserve the same component architecture, styling conventions, and import locations", not "shell out to the official generator by default".
-- If the user explicitly asks to add a missing shadcn-style primitive such as `dialog`, `popover`, `tabs`, or `sheet`, create the local component file, wire its imports, and keep the rest of the demo using that same local UI layer.
-- When generating demos, avoid raw ad hoc buttons, badges, cards, dialogs, or popovers if a local UI component exists or should exist.
 
 7. Map designer styles to a theme preset layer.
 

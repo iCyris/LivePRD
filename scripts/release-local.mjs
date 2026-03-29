@@ -42,8 +42,6 @@ async function copyEntry(sourcePath, targetPath) {
 
       const normalized = relative.split(path.sep).join("/");
       if (
-        normalized === "docs/prd/.versions" ||
-        normalized.startsWith("docs/prd/.versions/") ||
         normalized.startsWith("dist/release/")
       ) {
         return false;

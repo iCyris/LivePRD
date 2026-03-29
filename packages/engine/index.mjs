@@ -1,8 +1,9 @@
-import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import matter from "gray-matter";
 import { marked } from "marked";
+import { appendPrdComment, deletePrdComment, updatePrdComment } from "./prd-comments.mjs";
 
 const requiredFrontmatter = ["title", "slug", "owner", "status", "summary"];
 const liveDirectivePattern = /:::live-(demo|page)\n([\s\S]*?):::/g;
@@ -44,15 +45,6 @@ function highlightCode(text, lang) {
   }
 
   return escaped;
-}
-
-function versionSlugify(value) {
-  return String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5]+/gi, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "version";
 }
 
 function parseDirectiveFields(raw) {
@@ -190,11 +182,7 @@ export function validatePrdDocument(document) {
 export async function loadConfig(projectRoot) {
   const configPath = path.join(projectRoot, "live-prd.config.json");
   const raw = await readFile(configPath, "utf8");
-  const config = JSON.parse(raw);
-  return {
-    versionDir: "docs/prd/.versions",
-    ...config,
-  };
+  return JSON.parse(raw);
 }
 
 async function scanMarkdownFiles(directory) {
@@ -325,187 +313,26 @@ export async function writeDistArtifacts(projectRoot, config, documents) {
   );
 }
 
-function getVersionRoot(projectRoot, config, slug) {
-  return path.join(projectRoot, config.versionDir, slug);
-}
-
-function getVersionManifestPath(projectRoot, config, slug) {
-  return path.join(getVersionRoot(projectRoot, config, slug), "manifest.json");
-}
-
-async function readJsonIfExists(filePath, fallback) {
-  try {
-    return JSON.parse(await readFile(filePath, "utf8"));
-  } catch (error) {
-    if (error?.code === "ENOENT") {
-      return fallback;
-    }
-
-    throw error;
-  }
-}
-
-async function ensureVersionRoot(projectRoot, config, slug) {
-  const versionRoot = getVersionRoot(projectRoot, config, slug);
-  await mkdir(versionRoot, { recursive: true });
-  return versionRoot;
-}
-
-async function loadVersionManifest(projectRoot, config, slug) {
-  const manifestPath = getVersionManifestPath(projectRoot, config, slug);
-  const manifest = await readJsonIfExists(manifestPath, { versions: [] });
-  return {
-    versions: Array.isArray(manifest.versions) ? manifest.versions : [],
-  };
-}
-
-async function saveVersionManifest(projectRoot, config, slug, manifest) {
-  const manifestPath = getVersionManifestPath(projectRoot, config, slug);
-  await ensureVersionRoot(projectRoot, config, slug);
-  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-}
-
-function createSourceVersion(document, fileStats) {
-  return {
-    id: `source:${document.slug}`,
-    kind: "source",
-    label: "Source",
-    archived: false,
-    markdown: document.markdown,
-    file: document.file,
-    createdAt: fileStats.birthtime.toISOString(),
-    updatedAt: fileStats.mtime.toISOString(),
-  };
-}
-
-export async function loadFileVersionState(projectRoot, slug) {
-  const config = await loadConfig(projectRoot);
+export async function addPrdComment(projectRoot, slug, input) {
   const document = await renderPrdBySlug(projectRoot, slug);
-  const sourceFile = path.join(projectRoot, document.file);
-  const sourceStats = await stat(sourceFile);
-  const manifest = await loadVersionManifest(projectRoot, config, slug);
-  const versionRoot = getVersionRoot(projectRoot, config, slug);
-
-  const storedVersions = await Promise.all(
-    manifest.versions.map(async (entry) => {
-      const absolutePath = path.join(versionRoot, entry.fileName);
-
-      try {
-        const [markdown, fileStats] = await Promise.all([
-          readFile(absolutePath, "utf8"),
-          stat(absolutePath),
-        ]);
-
-        return {
-          id: entry.id,
-          kind: "version",
-          label: entry.label,
-          archived: Boolean(entry.archived),
-          markdown,
-          file: path.relative(projectRoot, absolutePath),
-          fileName: entry.fileName,
-          createdAt: entry.createdAt || fileStats.birthtime.toISOString(),
-          updatedAt: fileStats.mtime.toISOString(),
-        };
-      } catch (error) {
-        if (error?.code === "ENOENT") {
-          return null;
-        }
-
-        throw error;
-      }
-    }),
-  );
-
-  return {
-    slug,
-    sourceFile: document.file,
-    versions: [
-      createSourceVersion(document, sourceStats),
-      ...storedVersions.filter(Boolean),
-    ],
-  };
+  const absolutePath = path.join(projectRoot, document.file);
+  const { comment, markdown } = appendPrdComment(document.markdown, input);
+  await writeFile(absolutePath, markdown, "utf8");
+  return { comment };
 }
 
-function ensureUniqueFileName(existingEntries, baseName) {
-  const existing = new Set(existingEntries.map((entry) => entry.fileName));
-  if (!existing.has(`${baseName}.md`)) {
-    return `${baseName}.md`;
-  }
-
-  let index = 2;
-  while (existing.has(`${baseName}-${index}.md`)) {
-    index += 1;
-  }
-
-  return `${baseName}-${index}.md`;
+export async function updatePrdCommentStatus(projectRoot, slug, commentId, status) {
+  const document = await renderPrdBySlug(projectRoot, slug);
+  const absolutePath = path.join(projectRoot, document.file);
+  const { comment, markdown } = updatePrdComment(document.markdown, commentId, { status });
+  await writeFile(absolutePath, markdown, "utf8");
+  return { comment };
 }
 
-export async function saveFileVersion(projectRoot, slug, { versionId = null, label, markdown }) {
-  const config = await loadConfig(projectRoot);
-  const cleanLabel = String(label || "").trim();
-  if (!cleanLabel) {
-    throw new Error("Version name is required.");
-  }
-
-  await ensureVersionRoot(projectRoot, config, slug);
-  const manifest = await loadVersionManifest(projectRoot, config, slug);
-  const versionRoot = getVersionRoot(projectRoot, config, slug);
-  const now = new Date().toISOString();
-  const existingEntry = versionId
-    ? manifest.versions.find((entry) => entry.id === versionId)
-    : null;
-
-  if (existingEntry) {
-    await writeFile(path.join(versionRoot, existingEntry.fileName), markdown, "utf8");
-    existingEntry.label = cleanLabel;
-    existingEntry.updatedAt = now;
-  } else {
-    const nextId = `version:${Date.now()}`;
-    const fileName = ensureUniqueFileName(manifest.versions, versionSlugify(cleanLabel));
-    await writeFile(path.join(versionRoot, fileName), markdown, "utf8");
-    manifest.versions.unshift({
-      id: nextId,
-      label: cleanLabel,
-      archived: false,
-      fileName,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
-
-  await saveVersionManifest(projectRoot, config, slug, manifest);
-  return loadFileVersionState(projectRoot, slug);
-}
-
-export async function archiveFileVersion(projectRoot, slug, versionId) {
-  const config = await loadConfig(projectRoot);
-  const manifest = await loadVersionManifest(projectRoot, config, slug);
-  const target = manifest.versions.find((entry) => entry.id === versionId);
-
-  if (!target) {
-    throw new Error("Version not found.");
-  }
-
-  target.archived = true;
-  target.updatedAt = new Date().toISOString();
-  await saveVersionManifest(projectRoot, config, slug, manifest);
-  return loadFileVersionState(projectRoot, slug);
-}
-
-export async function deleteFileVersion(projectRoot, slug, versionId) {
-  const config = await loadConfig(projectRoot);
-  const manifest = await loadVersionManifest(projectRoot, config, slug);
-  const target = manifest.versions.find((entry) => entry.id === versionId);
-
-  if (!target) {
-    throw new Error("Version not found.");
-  }
-
-  manifest.versions = manifest.versions.filter((entry) => entry.id !== versionId);
-  await rm(path.join(getVersionRoot(projectRoot, config, slug), target.fileName), {
-    force: true,
-  });
-  await saveVersionManifest(projectRoot, config, slug, manifest);
-  return loadFileVersionState(projectRoot, slug);
+export async function removePrdComment(projectRoot, slug, commentId) {
+  const document = await renderPrdBySlug(projectRoot, slug);
+  const absolutePath = path.join(projectRoot, document.file);
+  const { comment, markdown } = deletePrdComment(document.markdown, commentId);
+  await writeFile(absolutePath, markdown, "utf8");
+  return { comment };
 }

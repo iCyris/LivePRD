@@ -84,3 +84,38 @@ caption: Page-level preview for the recovery experience.
 
 - Which payment providers can safely resume after timeout versus requiring a full restart?
 - How long should preserved recovery state remain valid?
+
+<!-- live-prd-comments
+[
+  {
+    "id": "comment-1774758497456",
+    "quote": "ccasionally hit a timeout after the",
+    "occurrence": 0,
+    "body": "你好",
+    "status": "open",
+    "createdAt": "2026-03-29T04:28:17.456Z",
+    "updatedAt": "2026-03-29T06:07:04.248Z",
+    "resolvedAt": null
+  },
+  {
+    "id": "comment-1774758607519",
+    "quote": "ompletion intent w",
+    "occurrence": 0,
+    "body": "测试22222",
+    "status": "resolved",
+    "createdAt": "2026-03-29T04:30:07.519Z",
+    "updatedAt": "2026-03-29T06:07:07.499Z",
+    "resolvedAt": "2026-03-29T06:07:07.499Z"
+  },
+  {
+    "id": "comment-1774758852839",
+    "quote": "bmit checkout. The current ex",
+    "occurrence": 0,
+    "body": "待确认",
+    "status": "resolved",
+    "createdAt": "2026-03-29T04:34:12.839Z",
+    "updatedAt": "2026-03-29T06:24:03.855Z",
+    "resolvedAt": "2026-03-29T06:24:03.855Z"
+  }
+]
+-->

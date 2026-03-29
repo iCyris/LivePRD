@@ -1,14 +1,14 @@
 # Live PRD Studio
 
-Live PRD Studio is a single CLI product for living PRDs: initialize a workspace, co-write Markdown specs with AI, embed runnable `shadcn/ui + React + Vite` demos, and publish the result as a richer HTML requirement artifact.
+Live PRD Studio is a single CLI product for living PRDs: initialize a workspace, keep Markdown as the source of truth, embed runnable `shadcn/ui + React + Vite` demos, and render the result into a richer HTML requirement artifact.
 
 ## Core Model
 
 - `docs/prd/*.md` stays the source of truth.
+- The web app is a one-way renderer: switch among local PRDs, preview them, and export what you see.
 - `:::live-demo` and `:::live-page` embed runnable UI proof points inside Markdown.
 - `demos/*.jsx` contains the React artifacts referenced by the PRD.
-- `docs/prd/.versions/` stores named local Markdown versions.
-- `skills/live-prd-studio/SKILL.md` teaches an AI tool how to drive the workflow end to end.
+- The bundled skill teaches an AI tool how to create PRDs and demos while staying inside the project structure.
 
 ## Requirements
 
@@ -32,11 +32,20 @@ Common follow-up commands:
 
 ```bash
 npm run live-prd -- new checkout-timeout-recovery
-npm run live-prd -- add-demo retry-card
-npm run live-prd -- add-page checkout-recovery-page
+npm run live-prd -- add-demo retry-card --file docs/prd/product-requirements.md --marker primary
+npm run live-prd -- add-page checkout-recovery-page --file docs/prd/product-requirements.md --after-heading "Live Demo"
 npm run validate
 npm run build
 npm run preview
+```
+
+Upgrade the system layer safely:
+
+```bash
+npm run live-prd -- upgrade check
+npm run live-prd -- upgrade apply --dry-run
+npm run live-prd -- upgrade apply
+npm run live-prd -- upgrade rollback <backup-id>
 ```
 
 Install the bundled skill bundle:
@@ -88,7 +97,7 @@ Ask the skill to generate both the React file and the directive block, and speci
 - `Replace the demo with id retry-card.`
 - `Insert a page demo at <!-- DEMO: checkout-recovery -->.`
 
-The CLI can scaffold the file, while the skill updates the PRD Markdown:
+The CLI can scaffold the file and insert the directive block at a marker, heading, or existing demo id:
 
 ```md
 :::live-demo
@@ -110,11 +119,17 @@ caption: Explain what this component demonstrates.
 
 ## Repository Layout
 
-- `apps/web`: authoring and preview UI
-- `packages/engine`: markdown rendering and PRD/version engine
+- `apps/web`: local Markdown preview and export UI
+- `packages/engine`: markdown rendering and PRD runtime engine
 - `packages/cli`: internal CLI implementation
 - `docs/prd`: canonical PRD Markdown files
-- `docs/prd/.versions`: local named Markdown versions
 - `demos`: runnable React demos and pages
 - `themes`: theme presets
 - `skills/live-prd-studio`: bundled AI skill
+
+## Upgrade Safety
+
+- `.live-prd/manifest.json` tracks system-managed files.
+- `.live-prd/backups/<timestamp>/` stores automatic upgrade backups.
+- `docs/prd/**`, `demos/**`, and user-authored content stay user-owned and are not overwritten by system upgrades.
+- `package.json` and `live-prd.config.json` are merged conservatively during upgrade instead of being blindly replaced.

@@ -16,7 +16,7 @@ function createDemoFrameSrc({ buildId, colorMode, demoStyle, frameId, source }) 
   return `/demo-frame.html?payload=${payload}&v=${encodeURIComponent(buildId)}`;
 }
 
-export function LiveBlock({ block, demoStyle }) {
+export function LiveBlock({ block, copy, demoStyle }) {
   const demoExists = hasDemoSource(block.source);
   const isPage = block.type === "live-page";
   const [frameStatus, setFrameStatus] = useState(demoExists ? "loading" : "missing");
@@ -42,7 +42,7 @@ export function LiveBlock({ block, demoStyle }) {
     setFrameHeight(block.height);
     setFrameStatus(demoExists ? "loading" : "missing");
     setFrameMessage("");
-  }, [block.height, block.source, demoExists, frameSrc]);
+  }, [block.height, block.source, copy, demoExists, frameSrc]);
 
   useEffect(() => {
     if (!demoExists) {
@@ -69,14 +69,14 @@ export function LiveBlock({ block, demoStyle }) {
 
       if (data.type === "live-prd-demo-error") {
         setFrameStatus("error");
-        setFrameMessage(data.message || "Demo failed to load.");
+        setFrameMessage(data.message || copy.demoLoadFailed);
       }
     };
 
     const timeoutId = window.setTimeout(() => {
       setFrameStatus((current) => {
         if (current === "loading") {
-          setFrameMessage("Demo load timed out. Try refreshing this page.");
+          setFrameMessage(copy.demoTimedOut);
           return "error";
         }
 
@@ -89,7 +89,7 @@ export function LiveBlock({ block, demoStyle }) {
       window.clearTimeout(timeoutId);
       window.removeEventListener("message", handleMessage);
     };
-  }, [block.height, demoExists, frameId]);
+  }, [block.height, copy, demoExists, frameId]);
 
   return (
     <Card className="overflow-hidden border-border/80 bg-card/90 shadow-[0_1px_2px_rgba(0,0,0,0.025)]">
@@ -97,7 +97,7 @@ export function LiveBlock({ block, demoStyle }) {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Badge className="bg-secondary text-secondary-foreground">
-              {isPage ? "Live page" : "Live demo"}
+              {isPage ? copy.livePage : copy.liveDemo}
             </Badge>
             <span className="text-xs text-muted-foreground">{block.id}</span>
           </div>
@@ -132,7 +132,7 @@ export function LiveBlock({ block, demoStyle }) {
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[inherit] bg-background/72 backdrop-blur-[1px]">
                 <div className="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-xs text-muted-foreground shadow-sm">
                   <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                  正在加载 demo
+                  {copy.loadingDemo}
                 </div>
               </div>
             ) : null}
@@ -142,10 +142,10 @@ export function LiveBlock({ block, demoStyle }) {
                 <div className="max-w-sm rounded-md border bg-card px-4 py-3 text-left shadow-sm">
                   <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <AlertTriangle className="h-4 w-4" />
-                    Demo 加载失败
+                    {copy.demoLoadFailed}
                   </div>
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                    {frameMessage || "当前 demo 未成功启动。你可以刷新页面后再试。"}
+                    {frameMessage || copy.demoFailedDefault}
                   </p>
                   <p className="mt-2 text-[11px] text-muted-foreground">
                     {block.source}
@@ -157,7 +157,7 @@ export function LiveBlock({ block, demoStyle }) {
         ) : (
           <div className="flex min-h-[240px] items-center gap-3 rounded-xl border border-dashed bg-muted/40 p-6 text-sm text-muted-foreground">
             <AlertTriangle className="h-5 w-5 text-foreground" />
-            Could not resolve demo module for <code>{block.source}</code>.
+            {copy.demoMissing(block.source)}
           </div>
         )}
       </CardContent>

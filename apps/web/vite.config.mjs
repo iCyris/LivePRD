@@ -4,11 +4,10 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import {
-  archiveFileVersion,
-  deleteFileVersion,
-  loadFileVersionState,
+  addPrdComment,
+  removePrdComment,
   renderCatalog,
-  saveFileVersion,
+  updatePrdCommentStatus,
 } from "../../packages/engine/index.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,37 +44,30 @@ async function handlePrdApi(req, res) {
       return true;
     }
 
-    const versionMatch = pathname.match(/^\/api\/prd\/([^/]+)\/versions$/);
-    if (req.method === "GET" && versionMatch) {
-      const slug = decodeURIComponent(versionMatch[1]);
-      const payload = await loadFileVersionState(workspaceRoot, slug);
-      json(res, 200, payload);
-      return true;
-    }
-
-    const saveMatch = pathname.match(/^\/api\/prd\/([^/]+)\/versions\/save$/);
-    if (req.method === "POST" && saveMatch) {
-      const slug = decodeURIComponent(saveMatch[1]);
+    const createCommentMatch = pathname.match(/^\/api\/prd\/([^/]+)\/comments$/);
+    if (req.method === "POST" && createCommentMatch) {
+      const slug = decodeURIComponent(createCommentMatch[1]);
       const body = await readRequestBody(req);
-      const payload = await saveFileVersion(workspaceRoot, slug, body);
+      const payload = await addPrdComment(workspaceRoot, slug, body);
       json(res, 200, payload);
       return true;
     }
 
-    const archiveMatch = pathname.match(/^\/api\/prd\/([^/]+)\/versions\/archive$/);
-    if (req.method === "POST" && archiveMatch) {
-      const slug = decodeURIComponent(archiveMatch[1]);
+    const updateCommentMatch = pathname.match(/^\/api\/prd\/([^/]+)\/comments\/([^/]+)$/);
+    if (req.method === "PATCH" && updateCommentMatch) {
+      const slug = decodeURIComponent(updateCommentMatch[1]);
+      const commentId = decodeURIComponent(updateCommentMatch[2]);
       const body = await readRequestBody(req);
-      const payload = await archiveFileVersion(workspaceRoot, slug, body.versionId);
+      const payload = await updatePrdCommentStatus(workspaceRoot, slug, commentId, body.status);
       json(res, 200, payload);
       return true;
     }
 
-    const deleteMatch = pathname.match(/^\/api\/prd\/([^/]+)\/versions\/([^/]+)$/);
-    if (req.method === "DELETE" && deleteMatch) {
-      const slug = decodeURIComponent(deleteMatch[1]);
-      const versionId = decodeURIComponent(deleteMatch[2]);
-      const payload = await deleteFileVersion(workspaceRoot, slug, versionId);
+    const deleteCommentMatch = pathname.match(/^\/api\/prd\/([^/]+)\/comments\/([^/]+)$/);
+    if (req.method === "DELETE" && deleteCommentMatch) {
+      const slug = decodeURIComponent(deleteCommentMatch[1]);
+      const commentId = decodeURIComponent(deleteCommentMatch[2]);
+      const payload = await removePrdComment(workspaceRoot, slug, commentId);
       json(res, 200, payload);
       return true;
     }
