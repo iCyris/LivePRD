@@ -1,15 +1,9 @@
 import { marked } from "marked";
 import { extractPrdComments } from "../../../../packages/engine/prd-comments.mjs";
+import { themeRegistry } from "../runtime-generated/theme-registry.mjs";
 
 const directivePattern = /:::live-(demo|page)\n([\s\S]*?):::/g;
-const themeModules = import.meta.glob("../../../../themes/*.json", {
-  eager: true,
-  import: "default",
-});
-
-const themes = Object.fromEntries(
-  Object.values(themeModules).map((theme) => [theme.name, theme]),
-);
+const themes = themeRegistry;
 
 const shadcnDemoTokens = {
   radius: "0.75rem",
@@ -30,11 +24,24 @@ const shadcnDemoTokens = {
 
 function slugify(value) {
   return String(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim()
     .replace(/<[^>]+>/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function createHeadingIdFactory() {
+  const seen = new Map();
+
+  return (value) => {
+    const base = slugify(value) || "section";
+    const count = seen.get(base) || 0;
+    seen.set(base, count + 1);
+    return count === 0 ? base : `${base}-${count + 1}`;
+  };
 }
 
 function escapeHtml(value) {
@@ -122,9 +129,10 @@ function parseDirectiveFields(raw) {
 
 function createRenderer() {
   const renderer = new marked.Renderer();
+  const nextHeadingId = createHeadingIdFactory();
   renderer.heading = ({ tokens, depth }) => {
     const text = tokens.map((token) => token.text ?? "").join("");
-    const id = slugify(text);
+    const id = nextHeadingId(text);
     return `<h${depth} id="${id}">${text}</h${depth}>`;
   };
   renderer.code = ({ text, lang }) => {
@@ -149,13 +157,14 @@ function markdownToHtml(markdown) {
 function extractToc(markdown) {
   const toc = [];
   const pattern = /^(##|###)\s+(.+)$/gm;
+  const nextHeadingId = createHeadingIdFactory();
   let match;
 
   while ((match = pattern.exec(markdown)) !== null) {
     toc.push({
       depth: match[1].length,
       text: match[2].trim(),
-      id: slugify(match[2]),
+      id: nextHeadingId(match[2]),
     });
   }
 

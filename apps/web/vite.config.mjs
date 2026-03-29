@@ -12,7 +12,10 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const workspaceRoot = path.resolve(__dirname, "../..");
+const runtimeRoot = path.resolve(__dirname, "../..");
+const workspaceRoot = process.env.LIVE_PRD_WORKSPACE_ROOT
+  ? path.resolve(process.env.LIVE_PRD_WORKSPACE_ROOT)
+  : runtimeRoot;
 
 function json(res, statusCode, payload) {
   res.statusCode = statusCode;
@@ -113,12 +116,54 @@ function fileAuthoringApiPlugin() {
   };
 }
 
+function liveWorkspaceReloadPlugin() {
+  const watchRoots = [
+    path.join(workspaceRoot, "docs", "prd"),
+    path.join(workspaceRoot, "demos"),
+    path.join(workspaceRoot, "themes"),
+    path.join(runtimeRoot, "apps", "web", "src", "runtime-generated"),
+  ];
+
+  return {
+    name: "live-prd-workspace-reload",
+    configureServer(server) {
+      server.watcher.add(watchRoots);
+
+      let reloadTimer = null;
+      const scheduleReload = (changedFile) => {
+        const normalized = changedFile.split(path.sep).join("/");
+        const isRelevant = watchRoots.some((rootPath) => {
+          const normalizedRoot = rootPath.split(path.sep).join("/");
+          return normalized === normalizedRoot || normalized.startsWith(`${normalizedRoot}/`);
+        });
+
+        if (!isRelevant) {
+          return;
+        }
+
+        if (reloadTimer) {
+          clearTimeout(reloadTimer);
+        }
+
+        reloadTimer = setTimeout(() => {
+          server.ws.send({ type: "full-reload" });
+          reloadTimer = null;
+        }, 40);
+      };
+
+      server.watcher.on("add", scheduleReload);
+      server.watcher.on("change", scheduleReload);
+      server.watcher.on("unlink", scheduleReload);
+    },
+  };
+}
+
 export default defineConfig({
   root: __dirname,
   define: {
     __LIVE_PRD_BUILD_ID__: JSON.stringify(new Date().toISOString()),
   },
-  plugins: [react(), fileAuthoringApiPlugin()],
+  plugins: [react(), fileAuthoringApiPlugin(), liveWorkspaceReloadPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
@@ -126,7 +171,7 @@ export default defineConfig({
   },
   server: {
     fs: {
-      allow: [workspaceRoot],
+      allow: [workspaceRoot, runtimeRoot],
     },
   },
   build: {

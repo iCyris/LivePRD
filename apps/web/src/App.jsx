@@ -17,7 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import prdCatalogFallback, { defaultPrdSlug as defaultPrdSlugFallback } from "./generated/prd-data.mjs";
+import prdCatalogFallback, { defaultPrdSlug as defaultPrdSlugFallback } from "./runtime-generated/prd-data.mjs";
 import { LanguageToggle } from "./components/LanguageToggle.jsx";
 import { LiveBlock } from "./components/LiveBlock.jsx";
 import { ModeToggle } from "./components/ModeToggle.jsx";
@@ -34,12 +34,11 @@ import {
 } from "./lib/file-authoring.js";
 import {
   applyCommentHighlights,
-  applySelectionDraftHighlight,
   clearCommentHighlights,
-  clearSelectionDraftHighlight,
   getSelectionCommentDraft,
 } from "./lib/comment-highlights.js";
 import { useLanguagePreference } from "./lib/i18n.js";
+import { renderMermaidBlocks } from "./lib/mermaid.js";
 import { demoThemeVars, parseRuntimeDocument } from "./lib/prd-runtime.js";
 import { exportDemoBundle, exportMarkdownFile, exportShareHtml } from "./lib/share-export.js";
 import { useThemePreference } from "./lib/theme.js";
@@ -350,19 +349,25 @@ export default function App() {
     syncRenderedCommentHighlights();
   });
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const root = previewContentRef.current;
     if (!root) {
-      return;
+      return undefined;
     }
 
-    if (!selectionDraft) {
-      clearSelectionDraftHighlight(root);
-      return;
-    }
+    let cancelled = false;
+    window.requestAnimationFrame(() => {
+      renderMermaidBlocks(root).catch((error) => {
+        if (!cancelled) {
+          console.error("Failed to render mermaid blocks:", error);
+        }
+      });
+    });
 
-    applySelectionDraftHighlight(root, selectionDraft);
-  }, [selectionDraft, prdDocument?.comments, prdDocument?.markdown]);
+    return () => {
+      cancelled = true;
+    };
+  }, [prdDocument?.markdown]);
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -539,6 +544,10 @@ export default function App() {
       return;
     }
 
+    if (!event.altKey) {
+      return;
+    }
+
     if (
       event?.target instanceof Element &&
       event.target.closest("[data-prd-comment-highlight]")
@@ -572,7 +581,6 @@ export default function App() {
     const current = hoveredCommentStateRef.current;
 
     if (current.id === nextId) {
-      clearSelectionDraftHighlight(previewContentRef.current);
       closeCommentPopover();
       return;
     }
@@ -623,7 +631,6 @@ export default function App() {
       setAreCommentsVisible(true);
       closeCommentComposer();
       setSelectionDraft(null);
-      clearSelectionDraftHighlight(previewContentRef.current);
       window.getSelection()?.removeAllRanges();
     } catch (error) {
       setCommentError(error instanceof Error ? error.message : copy.commentSaveFailed);
@@ -1003,7 +1010,7 @@ export default function App() {
                               : "text-foreground"
                           }`}
                           href={`#${item.id}`}
-                          key={item.id}
+                          key={item.id || `toc-${item.depth}-${item.text}`}
                         >
                           {item.text}
                         </a>
@@ -1113,7 +1120,7 @@ export default function App() {
                         block={block}
                         copy={copy}
                         demoStyle={stableDemoStyle}
-                        key={`${block.type}-${block.id || index}`}
+                        key={`${block.type}-${block.id || block.source || "block"}-${index}`}
                       />
                     ),
                   )}

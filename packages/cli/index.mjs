@@ -20,25 +20,17 @@ const defaultWorkspaceConfig = {
   demoDir: "demos",
   themeDir: "themes",
   defaultTheme: "editorial-warm",
-  generatedModule: "apps/web/src/generated/prd-data.mjs",
+  generatedModule: ".live-prd/generated/prd-data.mjs",
   distDir: "dist/prd",
 };
 const workspaceMetaDir = ".live-prd";
 const workspaceManifestPath = path.join(workspaceMetaDir, "manifest.json");
 const workspaceBackupsDir = path.join(workspaceMetaDir, "backups");
 const starterSourceEntries = [
-  { source: "apps", target: "apps", type: "dir" },
-  { source: "packages", target: "packages", type: "dir" },
-  { source: "scripts", target: "scripts", type: "dir" },
+  { source: "apps", target: path.join(workspaceMetaDir, "runtime", "apps"), type: "dir" },
+  { source: "packages", target: path.join(workspaceMetaDir, "runtime", "packages"), type: "dir" },
+  { source: "scripts", target: path.join(workspaceMetaDir, "runtime", "scripts"), type: "dir" },
   { source: path.join("themes", "editorial-warm.json"), target: path.join("themes", "editorial-warm.json"), type: "file" },
-  {
-    sourceCandidates: [
-      path.join("packages", "cli", "assets", "live-prd-studio"),
-      path.join("skills", "live-prd-studio"),
-    ],
-    target: path.join("packages", "cli", "assets", "live-prd-studio"),
-    type: "dir",
-  },
 ];
 let engineModulePromise = null;
 
@@ -152,9 +144,30 @@ function normalizeWorkspacePackageJson(packageJson, fallbackName) {
 
 async function createWorkspacePackageJsonTemplate(targetDirName) {
   const rootPackageJson = JSON.parse(await readFile(path.join(packageRoot, "package.json"), "utf8"));
-  delete rootPackageJson.bin;
-  delete rootPackageJson.files;
-  return normalizeWorkspacePackageJson(rootPackageJson, targetDirName);
+  return {
+    name: targetDirName,
+    private: true,
+    type: "module",
+    packageManager: rootPackageJson.packageManager,
+    scripts: {
+      "live-prd": "node ./.live-prd/runtime/packages/cli/index.mjs",
+      cli: "node ./.live-prd/runtime/packages/cli/index.mjs",
+      doctor: "node ./.live-prd/runtime/packages/cli/index.mjs doctor",
+      validate: "node ./.live-prd/runtime/packages/cli/index.mjs validate",
+      render: "node ./.live-prd/runtime/packages/cli/index.mjs render",
+      dev: "node ./.live-prd/runtime/packages/cli/index.mjs dev",
+      build: "node ./.live-prd/runtime/packages/cli/index.mjs build",
+      preview: "node ./.live-prd/runtime/packages/cli/index.mjs preview",
+      "release:local": "node ./.live-prd/runtime/packages/cli/index.mjs release-local",
+    },
+    dependencies: {
+      ...(rootPackageJson.dependencies || {}),
+    },
+  };
+}
+
+function runtimeRootFor(projectRoot = workspaceRoot) {
+  return path.join(projectRoot, workspaceMetaDir, "runtime");
 }
 
 async function scanStarterSourceFiles() {
@@ -184,7 +197,7 @@ async function scanStarterSourceFiles() {
     }
 
     const nestedFiles = await listFilesRecursive(absoluteSource, {
-      exclude: sourceCandidates.includes("apps") ? ["apps/web/src/generated"] : [],
+      exclude: sourceCandidates.includes("apps") ? ["apps/web/src/runtime-generated"] : [],
       relativeFrom: packageRoot,
     });
     for (const file of nestedFiles) {
@@ -690,6 +703,41 @@ function replaceDirectiveById(markdown, targetId, nextBlock) {
   throw new Error(`Could not find live block with id "${targetId}".`);
 }
 
+function collectLiveBlockIds(markdown) {
+  const ids = [];
+  const directivePattern = /:::live-(demo|page)\n([\s\S]*?):::/g;
+  let match;
+
+  while ((match = directivePattern.exec(markdown)) !== null) {
+    const fields = parseDirectiveFields(match[2]);
+    if (fields.id) {
+      ids.push(fields.id);
+    }
+  }
+
+  return ids;
+}
+
+function assertUniqueLiveBlockId(markdown, nextId, replaceId, file) {
+  if (!nextId) {
+    return;
+  }
+
+  const remainingIds = collectLiveBlockIds(markdown)
+    .filter((id) => !replaceId || id !== replaceId);
+
+  if (remainingIds.includes(nextId)) {
+    throw new Error(
+      `Live block id "${nextId}" already exists in ${file}. Use --replace-id <id> or choose a different --id.`,
+    );
+  }
+}
+
+function extractLiveBlockId(block) {
+  const ids = collectLiveBlockIds(block);
+  return ids[0] || null;
+}
+
 function insertDirectiveIntoMarkdown(markdown, { nextBlock, replaceId, marker, afterHeading, beforeHeading }) {
   const activeModes = [replaceId, marker, afterHeading, beforeHeading].filter(Boolean);
   if (activeModes.length > 1) {
@@ -813,11 +861,18 @@ async function writeFileIfMissing(filePath, contents) {
   await writeFile(filePath, contents, "utf8");
 }
 
-function createDemoSourceContents(name, isPage = false) {
+async function resolveUiImportLine(isPage = false) {
+  const visibleAppPath = path.join(workspaceRoot, "apps", "web", "src", "components", "ui");
+  const basePath = (await pathExists(visibleAppPath)) ? "../apps/web/src/components/ui" : "../.live-prd/runtime/apps/web/src/components/ui";
+
+  return isPage
+    ? `import { Badge } from "${basePath}/badge.jsx";`
+    : `import { Button } from "${basePath}/button.jsx";`;
+}
+
+async function createDemoSourceContents(name, isPage = false) {
   const pascalName = toPascalCase(name);
-  const importLine = isPage
-    ? 'import { Badge } from "../apps/web/src/components/ui/badge.jsx";'
-    : 'import { Button } from "../apps/web/src/components/ui/button.jsx";';
+  const importLine = await resolveUiImportLine(isPage);
 
   return isPage
     ? `import { ArrowRight } from "lucide-react";
@@ -879,6 +934,88 @@ function parseHeight(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function createAgentsMdTemplate(projectName) {
+  return `# AGENTS.md
+
+This workspace is a Live PRD project. AI agents working here must follow this workflow.
+
+## Primary Goal
+
+- Keep the PRD under \`docs/prd/*.md\` as the source of truth.
+- Use the local Live PRD site so the user can inspect the rendered HTML and embedded demos while iterating.
+- Do not stop after generating Markdown unless the user explicitly asks for Markdown only.
+- Do not invent CLI package names or suggest \`npm install -g\` for an unverified package.
+- If a command such as \`live-prd\` is unavailable, use the verified local workspace command instead of guessing an installation path.
+
+## Required Workflow
+
+1. Inspect the workspace state before acting.
+
+- If this workspace is not fully set up, run:
+  \`npm install\`
+  \`npm run doctor\`
+
+2. Start the local authoring site for active PRD work.
+
+- Use:
+  \`npm run dev\`
+- Keep the preview running while editing PRDs and demos.
+
+3. Create or update PRDs with the real CLI.
+
+- Create a PRD:
+  \`npm run live-prd -- new <slug>\`
+- Edit the canonical Markdown in:
+  \`docs/prd/*.md\`
+- When the user asks to change requirements, copy, flows, scope, acceptance criteria, or business rules, update the PRD Markdown first.
+- Treat demo changes as supporting proof of the PRD, not as a replacement for updating the PRD text.
+
+4. Create or insert demos with the real CLI.
+
+- For the first creation of a new demo or page module, use the CLI instead of manually creating a new file path under \`demos/\`.
+- Insert a component demo:
+  \`npm run live-prd -- add-demo <name> --file docs/prd/<file>.md --after-heading "Live Demo"\`
+- Insert a page demo:
+  \`npm run live-prd -- add-page <name> --file docs/prd/<file>.md --after-heading "Live Demo"\`
+- Demo source files live in:
+  \`demos/*.jsx\`
+- After creating or inserting a demo, the CLI refreshes the runtime artifacts so the preview can resolve the new module.
+- If a demo file was created manually for any reason, run \`npm run render\` before trusting the preview.
+
+5. Validate when the structure changes.
+
+- Use:
+  \`npm run validate\`
+
+## Live Iteration Loop
+
+- After each PRD or demo change, tell the user to inspect the running preview.
+- The goal is to keep editing the PRD and its demos while the latest HTML rendering is visible.
+- If a request changes product meaning, reflect that meaning in \`docs/prd/*.md\` and then update the related demo if needed.
+- If a new demo was added, the preview should pick it up after the CLI refreshes runtime artifacts. If the page still shows stale output, refresh the browser or restart \`npm run dev\`.
+- If the user asks for a production-style check, use:
+  \`npm run build\`
+  \`npm run preview\`
+
+## Multi-PRD Safety
+
+- If multiple files exist under \`docs/prd/\`, do not guess which PRD to edit from an ambiguous request like:
+  \`continue\`
+  \`modify this\`
+  \`adjust the copy\`
+  \`update the demo\`
+- In those cases, confirm the target PRD first by slug or file path.
+
+## Response Style
+
+- Say what file or command you changed.
+- Say what the user should look at next in the preview.
+- Offer the next concrete Live PRD step.
+
+Project: ${projectName}
+`;
+}
+
 async function ensureDemoSource(name, isPage = false, options = {}) {
   const fileName = `${name}.jsx`;
   const targetPath = path.join(workspaceRoot, "demos", fileName);
@@ -896,7 +1033,7 @@ async function ensureDemoSource(name, isPage = false, options = {}) {
     };
   }
 
-  await writeFile(targetPath, createDemoSourceContents(name, isPage), "utf8");
+  await writeFile(targetPath, await createDemoSourceContents(name, isPage), "utf8");
   return {
     created: true,
     fileName,
@@ -907,6 +1044,7 @@ async function ensureDemoSource(name, isPage = false, options = {}) {
 async function insertDirectiveIntoPrdFile(file, nextBlock, options = {}) {
   const absolutePath = path.resolve(workspaceRoot, file);
   const source = await readFile(absolutePath, "utf8");
+  assertUniqueLiveBlockId(source, extractLiveBlockId(nextBlock), options["replace-id"], file);
   const nextSource = insertDirectiveIntoMarkdown(source, {
     nextBlock,
     replaceId: options["replace-id"],
@@ -933,6 +1071,7 @@ async function createPrd(slug) {
     }),
   );
   console.log(`Created ${path.relative(workspaceRoot, targetPath)}`);
+  await syncWorkspaceArtifacts();
 }
 
 async function createDemo(name, isPage = false, options = {}) {
@@ -959,8 +1098,11 @@ async function createDemo(name, isPage = false, options = {}) {
   if (options.file) {
     const prdPath = await insertDirectiveIntoPrdFile(options.file, nextBlock, options);
     console.log(`Updated ${path.relative(workspaceRoot, prdPath)}`);
+    await syncWorkspaceArtifacts();
     return;
   }
+
+  await syncWorkspaceArtifacts();
 
   console.log("");
   console.log("Directive snippet:");
@@ -985,11 +1127,11 @@ async function setTheme(file, themeName) {
   console.log(`Updated theme for ${path.relative(workspaceRoot, absolutePath)} -> ${themeName}`);
 }
 
-async function runCommand(command, args, cwd = workspaceRoot) {
+async function runCommand(command, args, cwd = workspaceRoot, env = process.env) {
   await new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd,
-      env: process.env,
+      env,
       stdio: "inherit",
     });
 
@@ -1005,9 +1147,27 @@ async function runCommand(command, args, cwd = workspaceRoot) {
   });
 }
 
-async function runRender(targetFile = null) {
-  const { renderCatalog, writeDistArtifacts, writeGeneratedModule } = await loadEngineForWorkspace();
+async function syncWorkspaceArtifacts(targetFile = null) {
+  const { renderCatalog, writeDistArtifacts, writeGeneratedModule, writeRuntimeGeneratedModules } = await loadEngineForWorkspace();
   const { config, documents, issues } = await renderCatalog(workspaceRoot, targetFile);
+  const runtimeRoot = await pathExists(runtimeRootFor(workspaceRoot))
+    ? runtimeRootFor(workspaceRoot)
+    : packageRoot;
+
+  await writeGeneratedModule(workspaceRoot, config, documents);
+  await writeRuntimeGeneratedModules(workspaceRoot, runtimeRoot, config, documents);
+  await writeDistArtifacts(workspaceRoot, config, documents);
+
+  return {
+    config,
+    documents,
+    issues,
+    generatedModulePath: config.generatedModule || defaultWorkspaceConfig.generatedModule,
+  };
+}
+
+async function runRender(targetFile = null) {
+  const { config, documents, issues, generatedModulePath } = await syncWorkspaceArtifacts(targetFile);
 
   if (issues.length > 0) {
     for (const issue of issues) {
@@ -1015,11 +1175,8 @@ async function runRender(targetFile = null) {
     }
   }
 
-  await writeGeneratedModule(workspaceRoot, config, documents);
-  await writeDistArtifacts(workspaceRoot, config, documents);
-
   console.log(`Rendered ${documents.length} PRD document(s).`);
-  console.log(`Generated module: ${config.generatedModule}`);
+  console.log(`Generated module: ${generatedModulePath}`);
   console.log(`Dist catalog: ${path.join(config.distDir, "catalog.json")}`);
 
   if (issues.length > 0) {
@@ -1029,7 +1186,7 @@ async function runRender(targetFile = null) {
 
 async function runViteCommand(mode, extraArgs = []) {
   const viteBin = path.join(workspaceRoot, "node_modules", "vite", "bin", "vite.js");
-  const viteConfig = path.join(workspaceRoot, "apps", "web", "vite.config.mjs");
+  const viteConfig = path.join(packageRoot, "apps", "web", "vite.config.mjs");
 
   if (!(await pathExists(viteBin))) {
     throw new Error("Vite is not installed in this workspace. Run npm install or bun install first.");
@@ -1044,10 +1201,14 @@ async function runViteCommand(mode, extraArgs = []) {
       ? [viteBin, "--config", viteConfig, ...extraArgs]
       : [viteBin, mode, "--config", viteConfig, ...extraArgs];
 
-  await runCommand(process.execPath, args);
+  await runCommand(process.execPath, args, workspaceRoot, {
+    ...process.env,
+    LIVE_PRD_WORKSPACE_ROOT: workspaceRoot,
+  });
 }
 
 async function copyStarterEntry(sourcePath, targetPath) {
+  await mkdir(path.dirname(targetPath), { recursive: true });
   await cp(sourcePath, targetPath, {
     recursive: true,
     filter: (currentSource) => {
@@ -1081,51 +1242,45 @@ async function initWorkspace(targetDir) {
     throw new Error(`Target directory is not empty: ${absoluteTarget}`);
   }
 
-  const entries = [
-    "apps",
-    "packages",
-    "scripts",
-    "live-prd.config.json",
-  ];
+  const entries = ["apps", "packages", "scripts"];
 
   for (const entry of entries) {
-    await copyStarterEntry(path.join(packageRoot, entry), path.join(absoluteTarget, entry));
+    await copyStarterEntry(
+      path.join(packageRoot, entry),
+      path.join(absoluteTarget, workspaceMetaDir, "runtime", entry),
+    );
   }
+
+  await writeFile(
+    path.join(absoluteTarget, "live-prd.config.json"),
+    `${JSON.stringify(
+      {
+        contentDir: "docs/prd",
+        demoDir: "demos",
+        themeDir: "themes",
+        defaultTheme: "editorial-warm",
+        distDir: "dist/prd",
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
 
   await mkdir(path.join(absoluteTarget, "docs", "prd"), { recursive: true });
   await mkdir(path.join(absoluteTarget, "demos"), { recursive: true });
   await mkdir(path.join(absoluteTarget, "themes"), { recursive: true });
-  await mkdir(path.join(absoluteTarget, "packages", "cli", "assets"), { recursive: true });
 
   await copyStarterEntry(
     path.join(packageRoot, "themes", "editorial-warm.json"),
     path.join(absoluteTarget, "themes", "editorial-warm.json"),
   );
-  await copyStarterEntry(
-    path.join(packageRoot, "skills", "live-prd-studio"),
-    path.join(absoluteTarget, "packages", "cli", "assets", "live-prd-studio"),
-  );
 
-  const targetConfig = await readWorkspaceConfig(absoluteTarget);
-  await writeFile(
-    path.join(absoluteTarget, targetConfig.contentDir, "product-requirements.md"),
-    createPrdTemplate({
-      title: "Product Requirements",
-      slug: "product-requirements",
-      theme: targetConfig.defaultTheme,
-    }),
-    "utf8",
-  );
-
-  const rootPackageJson = JSON.parse(await readFile(path.join(packageRoot, "package.json"), "utf8"));
-  rootPackageJson.name = path.basename(absoluteTarget);
-  rootPackageJson.private = true;
-  delete rootPackageJson.bin;
-  delete rootPackageJson.files;
+  const workspacePackageJson = await createWorkspacePackageJsonTemplate(path.basename(absoluteTarget));
 
   await writeFile(
     path.join(absoluteTarget, "package.json"),
-    `${JSON.stringify(rootPackageJson, null, 2)}\n`,
+    `${JSON.stringify(workspacePackageJson, null, 2)}\n`,
     "utf8",
   );
 
@@ -1147,16 +1302,22 @@ npm run dev
 
 \`\`\`bash
 npm run live-prd -- new checkout-recovery
-npm run live-prd -- add-demo retry-card --file docs/prd/product-requirements.md --marker primary
-npm run skill:install
+npm run live-prd -- add-demo retry-card --file docs/prd/checkout-recovery.md --after-heading "Live Demo"
 \`\`\`
 `,
     "utf8",
   );
 
-  const { renderCatalog, writeDistArtifacts, writeGeneratedModule } = await loadEngine();
+  await writeFile(
+    path.join(absoluteTarget, "AGENTS.md"),
+    createAgentsMdTemplate(path.basename(absoluteTarget)),
+    "utf8",
+  );
+
+  const { renderCatalog, writeDistArtifacts, writeGeneratedModule, writeRuntimeGeneratedModules } = await loadEngine();
   const { config, documents } = await renderCatalog(absoluteTarget);
   await writeGeneratedModule(absoluteTarget, config, documents);
+  await writeRuntimeGeneratedModules(absoluteTarget, runtimeRootFor(absoluteTarget), config, documents);
   await writeDistArtifacts(absoluteTarget, config, documents);
   await writeWorkspaceManifest(absoluteTarget, await createManagedManifest(absoluteTarget, {
     workspaceVersion: await getPackageVersion(packageRoot),
@@ -1168,6 +1329,7 @@ npm run skill:install
   console.log("- npm install");
   console.log("- npm run doctor");
   console.log("- npm run dev");
+  console.log("- npm run live-prd -- new <slug>");
 }
 
 function ok(label, detail = "") {
@@ -1276,12 +1438,16 @@ async function runDoctor() {
     );
   }
 
+  const systemRootPath = await pathExists(runtimeRootFor(workspaceRoot))
+    ? runtimeRootFor(workspaceRoot)
+    : path.join(workspaceRoot, "apps");
+
   const requiredPaths = [
     { label: "Config file", target: configPath, kind: "file" },
     { label: "Content directory", target: path.join(workspaceRoot, config.contentDir), kind: "dir" },
     { label: "Demo directory", target: path.join(workspaceRoot, config.demoDir), kind: "dir" },
     { label: "Theme directory", target: path.join(workspaceRoot, config.themeDir), kind: "dir" },
-    { label: "Generated module dir", target: path.dirname(path.join(workspaceRoot, config.generatedModule)), kind: "dir" },
+    { label: "System layer", target: systemRootPath, kind: "dir" },
   ];
 
   for (const item of requiredPaths) {
@@ -1291,7 +1457,7 @@ async function runDoctor() {
         "fail",
         item.label,
         `${path.relative(workspaceRoot, item.target)} is missing.`,
-        `Create ${path.relative(workspaceRoot, item.target)} or scaffold the workspace again.`,
+        `Restore ${path.relative(workspaceRoot, item.target)} by re-running live-prd init or applying a system update.`,
       );
       continue;
     }
@@ -1432,10 +1598,7 @@ async function run() {
   }
 
   if (command === "init") {
-    if (!args[0]) {
-      throw new Error("Usage: live-prd init <dir>");
-    }
-    await initWorkspace(args[0]);
+    await initWorkspace(args[0] || ".");
     return;
   }
 
@@ -1555,8 +1718,7 @@ async function run() {
     process.exit(1);
   }
 
-  const { renderCatalog, writeDistArtifacts, writeGeneratedModule } = await loadEngineForWorkspace();
-  const { config, documents, issues } = await renderCatalog(workspaceRoot, args[0]);
+  const { config, documents, issues, generatedModulePath } = await syncWorkspaceArtifacts(args[0]);
 
   if (issues.length > 0) {
     for (const issue of issues) {
@@ -1576,11 +1738,8 @@ async function run() {
     return;
   }
 
-  await writeGeneratedModule(workspaceRoot, config, documents);
-  await writeDistArtifacts(workspaceRoot, config, documents);
-
   console.log(`Rendered ${documents.length} PRD document(s).`);
-  console.log(`Generated module: ${config.generatedModule}`);
+  console.log(`Generated module: ${generatedModulePath}`);
   console.log(`Dist catalog: ${path.join(config.distDir, "catalog.json")}`);
 
   if (issues.length > 0) {

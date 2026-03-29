@@ -8,8 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 const sourceDirCandidates = [
-  path.join(projectRoot, "skills", "live-prd-studio"),
-  path.join(projectRoot, "packages", "cli", "assets", "live-prd-studio"),
+  path.join(projectRoot, "skills", "live-prd"),
+  path.join(projectRoot, "packages", "cli", "assets", "live-prd"),
 ];
 
 function printUsage() {
@@ -61,7 +61,7 @@ export async function runInstallSkill(args = process.argv.slice(2)) {
     throw new Error(`Unknown argument: ${arg}`);
   }
 
-  const targetDir = path.join(targetRoot, "live-prd-studio");
+  const targetDir = path.join(targetRoot, "live-prd");
   await mkdir(targetRoot, { recursive: true });
 
   if (await exists(targetDir)) {
@@ -87,7 +87,7 @@ export async function runInstallSkill(args = process.argv.slice(2)) {
   );
 
   const skillDoc = await readFile(path.join(targetDir, "SKILL.md"), "utf8");
-  const firstLine = skillDoc.split("\n").find((line) => line.startsWith("name:")) || "name: live-prd-studio";
+  const firstLine = skillDoc.split("\n").find((line) => line.startsWith("name:")) || "name: live-prd";
 
   console.log(`Installed ${firstLine.replace("name:", "").trim()} to ${targetDir}`);
   console.log("Next step: configure your AI tool to load skills from this project-local .agents/skills directory if needed.");

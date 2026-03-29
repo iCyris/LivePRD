@@ -1,23 +1,4 @@
-const modules = import.meta.glob("../../../demos/**/*.{js,jsx,ts,tsx}");
-const rawModules = import.meta.glob("../../../demos/**/*.{js,jsx,ts,tsx}", {
-  eager: true,
-  import: "default",
-  query: "?raw",
-});
-
-const registry = Object.fromEntries(
-  Object.entries(modules).map(([modulePath, loader]) => {
-    const normalized = modulePath.split("/demos/")[1];
-    return [`demos/${normalized}`, loader];
-  }),
-);
-
-const rawRegistry = Object.fromEntries(
-  Object.entries(rawModules).map(([modulePath, source]) => {
-    const normalized = modulePath.split("/demos/")[1];
-    return [`demos/${normalized}`, source];
-  }),
-);
+import { rawRegistry, registry } from "./runtime-generated/demo-registry.mjs";
 
 export function hasDemoSource(source) {
   return Boolean(registry[source]);

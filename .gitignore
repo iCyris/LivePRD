@@ -2,5 +2,6 @@ node_modules
 dist
 .DS_Store
 apps/web/dist
-apps/web/src/generated/prd-data.mjs
+apps/web/src/runtime-generated/
+.agents/
 .qoder

@@ -275,6 +275,36 @@ code {
   background: oklch(var(--card));
 }
 
+.prd-code-block--mermaid pre {
+  border-top: 1px solid oklch(var(--border));
+  background: oklch(var(--muted) / 0.22);
+}
+
+.prd-mermaid-render {
+  overflow-x: auto;
+  padding: 1.25rem 1rem;
+  background:
+    radial-gradient(circle at top, oklch(var(--muted) / 0.45), transparent 36%),
+    oklch(var(--card));
+}
+
+.prd-mermaid-render svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.prd-mermaid-error {
+  border: 1px solid oklch(var(--destructive) / 0.35);
+  border-radius: 0.75rem;
+  background: oklch(var(--destructive) / 0.08);
+  color: oklch(var(--destructive));
+  padding: 0.85rem 1rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
 .prd-code-head {
   display: flex;
   align-items: center;

@@ -5,10 +5,11 @@ Live PRD Studio is a single CLI product for living PRDs: initialize a workspace,
 ## Core Model
 
 - `docs/prd/*.md` stays the source of truth.
-- The web app is a one-way renderer: switch among local PRDs, preview them, and export what you see.
-- `:::live-demo` and `:::live-page` embed runnable UI proof points inside Markdown.
 - `demos/*.jsx` contains the React artifacts referenced by the PRD.
-- The bundled skill teaches an AI tool how to create PRDs and demos while staying inside the project structure.
+- When a requirement changes, update the PRD Markdown first and then sync any affected demo code.
+- `:::live-demo` and `:::live-page` embed runnable UI proof points inside Markdown.
+- In initialized workspaces, user-facing files stay at the root while the system runtime lives under `.live-prd/runtime/`.
+- The bundled skill helps AI tools stay inside the intended PRD and demo workflow.
 
 ## Requirements
 
@@ -16,12 +17,12 @@ Live PRD Studio is a single CLI product for living PRDs: initialize a workspace,
 - npm
 - Bun is optional but recommended
 
-## Published CLI Workflow
+## Quick Start
 
-Initialize a fresh workspace:
+Create a fresh workspace:
 
 ```bash
-npx live-prd init my-prd
+live-prd init my-prd
 cd my-prd
 npm install
 npm run doctor
@@ -32,43 +33,62 @@ Common follow-up commands:
 
 ```bash
 npm run live-prd -- new checkout-timeout-recovery
-npm run live-prd -- add-demo retry-card --file docs/prd/product-requirements.md --marker primary
-npm run live-prd -- add-page checkout-recovery-page --file docs/prd/product-requirements.md --after-heading "Live Demo"
+npm run live-prd -- add-demo retry-card --file docs/prd/checkout-timeout-recovery.md --after-heading "Live Demo"
+npm run live-prd -- add-page checkout-recovery-page --file docs/prd/checkout-timeout-recovery.md --after-heading "Live Demo"
 npm run validate
 npm run build
 npm run preview
 ```
 
-Upgrade the system layer safely:
+## Initialized Workspace
 
-```bash
-npm run live-prd -- upgrade check
-npm run live-prd -- upgrade apply --dry-run
-npm run live-prd -- upgrade apply
-npm run live-prd -- upgrade rollback <backup-id>
-```
+After `live-prd init`, the user-facing workspace is intentionally small:
 
-Install the bundled skill bundle:
+- `docs/prd/`
+- `demos/`
+- `themes/`
+- `live-prd.config.json`
+- `package.json`
+- `AGENTS.md`
 
-```bash
-npm run skill:install
-```
+The product runtime itself is stored under `.live-prd/runtime/`.
 
-By default this installs into the current project's `.agents/skills/`.
+## Structure Guide
 
-If your AI tool uses a different skills directory:
+There are two structures to keep in mind:
 
-```bash
-npm run skill:install -- --target /path/to/your/tool/skills
-```
+### Product Repository Structure
 
-Create a local release bundle:
+- `apps/web`: internal preview app and runtime UI
+- `apps/web/src/runtime-generated`: runtime-facing generated entrypoints
+- `packages/cli`: internal CLI source
+- `packages/engine`: internal markdown/rendering engine
+- `skills/live-prd`: AI guidance
 
-```bash
-npm run release:local
-```
+### Initialized Workspace Structure
 
-## Local Repository Workflow
+- `docs/prd/`: user-authored PRD markdown
+- `demos/`: user-authored demo modules
+- `themes/`: user-selectable theme presets
+- `.live-prd/runtime/`: hidden system layer managed by the CLI
+- `.live-prd/generated/`: workspace-side generated artifacts
+
+## AI Workflow
+
+When someone asks the bundled skill to create or update a PRD, the expected flow is:
+
+- Inspect workspace state first, then use the real CLI path such as `init`, `new`, `add-demo`, or `add-page`.
+- Start or prepare `npm run dev` so the rendered PRD is visible.
+- Keep iterating on both PRD Markdown and demos in chat.
+- Confirm the target PRD before ambiguous follow-up edits when multiple PRDs exist.
+
+Example prompts:
+
+- `Generate a retry demo and insert it after ## States and Edge Cases.`
+- `Replace the demo with id retry-card.`
+- `Insert a page demo at <!-- DEMO: checkout-recovery -->.`
+
+## Local Development
 
 If you are working inside this repository before publishing:
 
@@ -89,24 +109,37 @@ npm run skill:install
 npm run release:local
 ```
 
-## How AI Inserts Demos
+## Skill Install
 
-Ask the skill to generate both the React file and the directive block, and specify the insertion target clearly:
+Install the bundled skill bundle:
 
-- `Generate a retry demo and insert it after ## States and Edge Cases.`
-- `Replace the demo with id retry-card.`
-- `Insert a page demo at <!-- DEMO: checkout-recovery -->.`
+```bash
+npm run skill:install
+```
 
-The CLI can scaffold the file and insert the directive block at a marker, heading, or existing demo id:
+By default this installs into the current project's `.agents/skills/`.
 
-```md
-:::live-demo
-id: retry-card
-source: demos/retry-card.jsx
-height: 430
-theme: editorial-warm
-caption: Explain what this component demonstrates.
-:::
+If your AI tool uses a different skills directory:
+
+```bash
+npm run skill:install -- --target /path/to/your/tool/skills
+```
+
+## System Updates
+
+Upgrade the system layer safely:
+
+```bash
+npm run live-prd -- upgrade check
+npm run live-prd -- upgrade apply --dry-run
+npm run live-prd -- upgrade apply
+npm run live-prd -- upgrade rollback <backup-id>
+```
+
+Create a local release bundle:
+
+```bash
+npm run release:local
 ```
 
 ## Publish Workflow
@@ -119,13 +152,18 @@ caption: Explain what this component demonstrates.
 
 ## Repository Layout
 
-- `apps/web`: local Markdown preview and export UI
-- `packages/engine`: markdown rendering and PRD runtime engine
-- `packages/cli`: internal CLI implementation
-- `docs/prd`: canonical PRD Markdown files
-- `demos`: runnable React demos and pages
-- `themes`: theme presets
-- `skills/live-prd-studio`: bundled AI skill
+For day-to-day development in this repository, the main internal areas are:
+
+- `apps/web`
+- `packages/cli`
+- `packages/engine`
+- `skills/live-prd`
+
+Sample user-facing content in this repository lives under:
+
+- `docs/prd`
+- `demos`
+- `themes`
 
 ## Upgrade Safety
 

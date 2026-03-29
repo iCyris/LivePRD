@@ -101,6 +101,21 @@ The secondary user is an inventory manager who reviews trends, reassigns blocked
 - Operator marks it as `Needs verification`.
 - System keeps the note, requested verifier, and latest timestamp visible in the queue.
 
+### Mermaid Flow Test
+
+```mermaid
+flowchart TD
+    A[Operator opens queue] --> B{Severity critical?}
+    B -->|Yes| C[Open row details]
+    B -->|No| D[Keep in monitoring queue]
+    C --> E{Enough confidence to act?}
+    E -->|Yes| F[Assign owner and due time]
+    E -->|No| G[Mark as Needs verification]
+    F --> H[Add operational note]
+    G --> H
+    H --> I[Queue refreshes with latest status]
+```
+
 ## States and Edge Cases
 
 - A row has no owner and is older than SLA threshold.

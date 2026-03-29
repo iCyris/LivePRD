@@ -1,0 +1,8 @@
+interface:
+  display_name: "Live PRD Studio"
+  short_description: "Co-write PRDs with live embedded demos"
+  brand_color: "#BC5A2D"
+  default_prompt: "Use the live-prd skill as an execution runbook. First inspect the workspace state, then initialize projects with the real live-prd CLI only. Do not use scaffold-based project initialization. After initialization, create or update the target PRD, insert demos with add-demo or add-page when useful, and launch or prepare npm run dev so the user can inspect the rendered HTML. Continue iterating on the PRD Markdown and demos in chat, and if multiple PRDs exist, confirm which PRD to edit before ambiguous follow-up changes."
+
+policy:
+  allow_implicit_invocation: true

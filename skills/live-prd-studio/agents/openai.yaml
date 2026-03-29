@@ -1,8 +1,0 @@
-interface:
-  display_name: "Live PRD Studio"
-  short_description: "Co-write PRDs with live embedded demos"
-  brand_color: "#BC5A2D"
-  default_prompt: "Use the live-prd-studio skill to turn these notes into a markdown PRD, render plan, and embedded shadcn/ui demos."
-
-policy:
-  allow_implicit_invocation: true

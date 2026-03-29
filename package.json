@@ -1,6 +1,6 @@
 {
   "name": "live-prd",
-  "version": "0.3.0",
+  "version": "0.7.0",
   "description": "CLI and starter workspace for living Markdown PRDs with embedded React demos.",
   "private": false,
   "type": "module",
@@ -43,6 +43,7 @@
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.7.0",
     "marked": "^17.0.5",
+    "mermaid": "^11.13.0",
     "postcss": "^8.5.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
