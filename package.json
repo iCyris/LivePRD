@@ -1,6 +1,6 @@
 {
   "name": "live-prd",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CLI and starter workspace for living Markdown PRDs with embedded React demos.",
   "private": false,
   "type": "module",
